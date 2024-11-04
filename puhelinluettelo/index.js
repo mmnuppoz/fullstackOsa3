@@ -1,25 +1,27 @@
 const express = require('express')
 const app = express()
 
+app.use(express.json())
+
 let persons = [
     {
       id: "1",
-      content: "Arto Hellas",
+      name: "Arto Hellas",
       number: "040-123456"
     },
     {
       id: "2",
-      content: "Ada Lovelace",
+      name: "Ada Lovelace",
       number: "39-44-5323523"
     },
     {
       id: "3",
-      content: "Dan Abramov",
+      name: "Dan Abramov",
       number: "12-43-234345"
     },
     {
       id: "4",
-      content: "Mary Poppedieck",
+      name: "Mary Poppedieck",
       number: "39-23-6423122"
     }
   ]
@@ -49,6 +51,20 @@ let persons = [
   
     response.status(204).end()
   })
+
+  app.post('/api/persons', (request, response) => {
+    const { name } = request.body;
+    const randomPhoneNumber = `0${Math.floor(Math.random() * 9000000) + 1000000}`;
+  
+    const newPerson = {
+      id: String(persons.length + 1),
+      name: name,
+      number: randomPhoneNumber
+    };
+  
+    persons.push(newPerson);
+    response.status(201).json(newPerson);
+  });
 
   app.get('/info', (request, response) => {
     const time = new Date()
