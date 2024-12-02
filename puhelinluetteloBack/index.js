@@ -1,8 +1,10 @@
+require('dotenv').config()
 const express = require('express')
 const app = express()
 const cors = require('cors')
 var morgan = require('morgan')
 morgan.token('body', (req) => JSON.stringify(req.body))
+const Person = require('./models/person')
 
 app.use(express.static('dist'))
 app.use(express.json())
@@ -11,7 +13,7 @@ app.use(
 )
 app.use(cors())
 
-let persons = [
+/*let persons = [
     {
         id: "1",
         name: "Arto Hellas",
@@ -32,14 +34,16 @@ let persons = [
         name: "Mary Poppedieck",
         number: "39-23-6423122"
     }
-]
+]*/
 
 app.get('/', (request, response) => {
     response.send('<h1>Moi!</h1>')
 })
 
 app.get('/api/persons', (request, response) => {
-    response.json(persons)
+    Person.find({}).then(persons => {
+      response.json(persons)
+    })
 })
 
 app.get('/api/persons/:id', (request, response) => {
@@ -61,27 +65,17 @@ app.delete('/api/persons/:id', (request, response) => {
 })
 
 app.post('/api/persons', (request, response) => {
-    const { name } = request.body;
-    const randomPhoneNumber = `0${Math.floor(Math.random() * 9000000) + 1000000}`;
+    const body = request.body
+    
+    const person = new Person({
+        name: body.name,
+        number: body.number
+    })
 
-    if (!name) {
-        return response.status(400).json({ error: 'Nimi vaaditaan' });
-    }
-
-    const nameExists = persons.some(person => person.name === name);
-    if (nameExists) {
-        return response.status(400).json({ error: 'Name must be unique' });
-    }
-
-    const newPerson = {
-        id: String(persons.length + 1),
-        name: name,
-        number: randomPhoneNumber
-    };
-
-    persons.push(newPerson);
-    response.status(201).json(newPerson);
-});
+    person.save().then(savedPerson => {
+        response.json(savedPerson)
+    })
+})
 
 app.get('/info', (request, response) => {
     const time = new Date()
@@ -94,7 +88,7 @@ app.get('/info', (request, response) => {
     `)
 })
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
