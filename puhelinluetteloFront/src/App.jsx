@@ -79,6 +79,15 @@ const App = () => {
         setNewName('')
         setNewNumber('')
       })
+      .catch(error => {
+        setNotification({
+          text: error.response.data.error || 'An unexpected error occurred',
+          type: 'error'
+        })
+        setTimeout(() => {
+          setNotification(null)
+        }, 5000)
+      })
     }
   }
 
